@@ -6,7 +6,9 @@
   <body>
 	<div class="layout">
 		<div id="login"></div>
+		<div id="list"></div>
 	</div>
+	<div class="spinner"></div>
 	<script type="text/javascript">
 		window.phantom = require('phantom').create();
 		phantom.then(function(ph) {
@@ -14,6 +16,7 @@
 				window.page = page;
 			});
 		});
+		window.fs = require('fs');
 	</script>
 	<script type="text/javascript" src="build/main.js"></script>
   </body>
