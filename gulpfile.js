@@ -4,9 +4,16 @@ var gulp = require('gulp'),
     wrapper = require('gulp-wrapper'),
     clean = require('gulp-clean'),
     sync = require('gulp-sync')(gulp),
-    webpack = require('webpack-stream');
+    webpack = require('webpack-stream'),
+    webserver = require('gulp-webserver');
 
-gulp.task('default', sync.sync([['styles', 'scripts'], 'clean-temp']), function() {});
+gulp.task('default', sync.sync([
+    [
+        ['styles', 'scripts', 'copy-maps'],
+        'clean-temp'
+    ],
+    'webserver'
+    ]), function() {});
 
 gulp.task('styles', function() {
     return gulp.src([
@@ -20,6 +27,11 @@ gulp.task('styles', function() {
 gulp.task('scripts', ['build-webpack', 'templates'], function() {
     return gulp.src(['temp/main.js', 'temp/templates.js'])
         .pipe(concat('main.js'))
+        .pipe(gulp.dest('build'));
+});
+
+gulp.task('copy-maps', function() {
+    return gulp.src(['temp/main.js.map'])
         .pipe(gulp.dest('build'));
 });
 
@@ -41,6 +53,14 @@ gulp.task('templates', function() {
         }))
         .pipe(concat('templates.js'))
         .pipe(gulp.dest('temp'));
+});
+
+gulp.task('webserver', function() {
+/*    gulp.src(__dirname)
+        .pipe(webserver({
+            open: true,
+            fallback: 'index.html'
+        }));*/
 });
 
 gulp.task('clean-temp', function() {

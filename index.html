@@ -5,8 +5,16 @@
   </head>
   <body>
 	<div class="layout">
-		layout
+		<div id="login"></div>
 	</div>
+	<script type="text/javascript">
+		window.phantom = require('phantom').create();
+		phantom.then(function(ph) {
+			ph.createPage().then(function(page) {
+				window.page = page;
+			});
+		});
+	</script>
 	<script type="text/javascript" src="build/main.js"></script>
   </body>
 </html>
