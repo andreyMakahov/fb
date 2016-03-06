@@ -47,22 +47,21 @@ class AuthView extends Mn.LayoutView {
 			})
 			.then(function() {
 				self.goToLists();
-			})
+			});
 		});
 	}
 
 	goToLists() {
-		page.open('https://www.facebook.com/bookmarks/lists')
-		.then(function(status) {
-			setTimeout(function() {
-				page.evaluate(function() {
-					return document.getElementsByTagNme('body')[0];
-				})
-				.then(function(body) {
-					console.log(body.innerHTML)
-				})
-			}, 3000);
-		});
+		setTimeout(function() {
+			page.evaluate(function(params) {
+			    location.href = 'https://www.facebook.com/bookmarks/lists';
+			})
+			.then(function() {
+				setTimeout(function() {
+					page.render('test.png');
+				}, 3000);
+			});
+		}, 3000)
 	}
 }
 
