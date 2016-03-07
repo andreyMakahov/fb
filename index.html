@@ -12,6 +12,9 @@
 		phantom.then(function(ph) {
 			ph.createPage().then(function(page) {
 				window.page = page;
+        page.property('onConsoleMessage', function (msg) {
+        	console.log(msg);
+        });
 			});
 		});
 	</script>

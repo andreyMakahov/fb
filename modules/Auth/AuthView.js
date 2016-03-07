@@ -1,7 +1,8 @@
 import Mn from 'backbone.marionette';
+import ELV from '../Events/EventsListView.js';
 
 class AuthView extends Mn.LayoutView {
-	
+
 	ui () {
 		return {
 			email: '#inputEmail',
@@ -31,15 +32,15 @@ class AuthView extends Mn.LayoutView {
 
 		let email = this.ui.email.val();
 		let password = this.ui.password.val();
-		
+
 		page.open('https://facebook.com/login')
 		.then(function(status) {
 			page.evaluate(function(params) {
 			    var emailInput = document.getElementsByName("email")[0];
 				var passInput = document.getElementsByName("pass")[0];
 				var form = document.getElementById('login_form');
-				emailInput.value = params.email;
-				passInput.value = params.password;
+				emailInput.value = 'mikrowelt@gmail.com';//params.email;
+				passInput.value = 'QWERlmd23';//params.password;
 				return form.submit();
 			}, {
 				email: email,
@@ -53,14 +54,9 @@ class AuthView extends Mn.LayoutView {
 
 	goToLists() {
 		setTimeout(function() {
-			page.evaluate(function(params) {
-			    location.href = 'https://www.facebook.com/bookmarks/lists';
-			})
-			.then(function() {
-				setTimeout(function() {
-					page.render('test.png');
-				}, 3000);
-			});
+			let elv = new ELV();
+			console.log('go ELV', elv, app);
+			app.rootView.getRegion('login').show(elv);
 		}, 3000)
 	}
 }

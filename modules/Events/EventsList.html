@@ -1,0 +1,12 @@
+<script id="EventsList" type="x-tmpl-mustache">
+  <div class="container">
+    <h1>Текущие мероприятия</h1>
+    <div class="row">
+      {{#collection}}
+      <div class="col-md-12 event-item" data-id="{{id}}">
+        {{name}}
+      </div>
+      {{/collection}}
+    </div>
+  </div>
+</script>
