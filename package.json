@@ -4,7 +4,8 @@
   "version": "0.0.1",
   "window": {
     "title": "Stereotactic",
-    "icon": "./logo.jpg"
+    "icon": "./logo.jpg",
+    "toolbar": false
   },
   "dependencies": {
     "gulp": "^3.9.1",
