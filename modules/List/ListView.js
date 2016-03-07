@@ -31,18 +31,22 @@ class ListView extends Mn.LayoutView {
 
 	parseItem(e) {
 		e.preventDefault();
-		let target = $(e.currentTarget);
+		let target = $(e.currentTarget),
+			url = target.prop('href');
 
+		app.startLoading();
 		page.evaluate(function(href) {
 			location.href = href;
-		}, target.data('href'))
+		}, url)
 		.then(() => {
 
 			setTimeout(() => {
-
 				page.evaluate(function () {
 					window.___finish = false;
-					var element = document.getElementById('friend_list_members_box').getElementsByClassName('fbFriendListMemberBoxTitle')[0].getElementsByTagName('a')[0];
+					var element = document
+						.getElementById('friend_list_members_box')
+						.getElementsByClassName('fbFriendListMemberBoxTitle')[0]
+						.getElementsByTagName('a')[0];
 
 					// create a mouse click event
 					var event = document.createEvent( 'MouseEvents' );
@@ -240,9 +244,10 @@ class ListView extends Mn.LayoutView {
 		console.log(csv);
 		fs.writeFile(path, content, function(err) {
 		    if(err) {
-		        alert("error");
+		        console.log('error');
 		    }
 		});
+		app.stopLoading();
 	}
 
 }

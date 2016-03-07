@@ -1,8 +1,7 @@
 <script id="ListTemplate" type="x-tmpl-mustache">
-
-	<div class="list">
+	<div class="list-group">
 		{{#list}}
-			<div class="list-item" data-href="{{link}}">{{title}}</div>
+			<a href="{{link}}" class="list-item list-group-item">{{title}}</a>
 		{{/list}}
-	</div> 
+	</div>
 </script>
