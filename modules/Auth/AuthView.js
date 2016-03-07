@@ -82,11 +82,23 @@ class AuthView extends Mn.LayoutView {
 			password: password
 		})
 		.then(() => {
-			page.render('login.png')
-			self.remove();
-			app.rootView.getRegion('menu').show(new MenuView());
-			app.authorized = true;
-			app.stopLoading();
+			setTimeout(() => {
+				page.evaluate(function() {
+		    		return document.querySelectorAll('[data-ownerid="pass"]').length;
+				})
+				.then((error) => {
+
+					app.stopLoading();
+					if(error) {
+						alert('Неправильный пароль');
+						this.ui.password.val('');
+					} else {
+						self.remove();
+						app.rootView.getRegion('menu').show(new MenuView());
+						app.authorized = true;
+					}
+				});
+			}, 2000);
 		});
 	}
 

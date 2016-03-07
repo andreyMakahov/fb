@@ -7960,6 +7960,8 @@
 		}, {
 			key: '_login',
 			value: function _login(email, password) {
+				var _this4 = this;
+	
 				var self = this;
 				page.evaluate(function (params) {
 					var emailInput = document.getElementsByName("email")[0];
@@ -7973,11 +7975,22 @@
 					email: email,
 					password: password
 				}).then(function () {
-					page.render('login.png');
-					self.remove();
-					app.rootView.getRegion('menu').show(new _MenuView2.default());
-					app.authorized = true;
-					app.stopLoading();
+					setTimeout(function () {
+						page.evaluate(function () {
+							return document.querySelectorAll('[data-ownerid="pass"]').length;
+						}).then(function (error) {
+	
+							app.stopLoading();
+							if (error) {
+								alert('Неправильный пароль');
+								_this4.ui.password.val('');
+							} else {
+								self.remove();
+								app.rootView.getRegion('menu').show(new _MenuView2.default());
+								app.authorized = true;
+							}
+						});
+					}, 2000);
 				});
 			}
 		}, {
