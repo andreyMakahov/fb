@@ -3,7 +3,7 @@ import _ from 'underscore';
 import $ from 'jquery';
 
 class ListView extends Mn.LayoutView {
-	
+
 	ui () {
 		return {
 			item: '.list-item'
@@ -97,10 +97,9 @@ class ListView extends Mn.LayoutView {
 					return window.___finish;
 				})
 				.then(() => {
-					page.render('eee.png')
 					this.checkFinish();
-				})	
-				
+				})
+
 			}, 3000);
 
 		})

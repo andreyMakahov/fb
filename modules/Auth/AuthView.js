@@ -30,7 +30,7 @@ class AuthView extends Mn.LayoutView {
 
 	onLogin(e) {
 		e.preventDefault();
-		
+
 		let self = this;
 
 		let email = this.ui.email.val();
@@ -75,7 +75,7 @@ class AuthView extends Mn.LayoutView {
 			var form = document.getElementById('login_form');
 			emailInput.value = params.email;
 			passInput.value = params.password;
-			
+
 			return form.submit();
 		}, {
 			email: email,
@@ -108,7 +108,6 @@ class AuthView extends Mn.LayoutView {
 			location.href = 'https://facebook.com/login';
 		});
 		setTimeout(() => {
-			page.render('aaa.png')
 			page.evaluate(function() {
 				document.getElementById('userNavigationLabel').click();
 			});

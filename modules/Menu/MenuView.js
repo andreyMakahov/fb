@@ -5,7 +5,7 @@ import ListView from '../List/ListView.js';
 import ELV from '../Events/EventsListView.js';
 
 class MenuView extends Mn.LayoutView {
-	
+
 	ui () {
 		return {
 			'item': '.js-menu-item'
@@ -48,7 +48,6 @@ class MenuView extends Mn.LayoutView {
 				break;
 			case 'EventListView':
 				app.rootView.getRegion('list').show(new ELV());
-				app.stopLoading();
 				break;
 		}
 	}

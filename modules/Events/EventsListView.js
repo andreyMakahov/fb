@@ -1,5 +1,6 @@
 import Mn from 'backbone.marionette';
 import EventsCollection from './EventsListCollection.js';
+import Q from 'q';
 
 var asd = 0;
 
@@ -23,10 +24,11 @@ export default class EventsListView extends Mn.ItemView {
     });
     this.collection = new EventsCollection();
     this.collection.fetch()
-    .then(() => {
-      console.log(this.collection);
-      this.render();
-    });
+      .then(() => {
+        console.log(this.collection);
+        this.render();
+        app.stopLoading();
+      });
   }
 
   serializeData() {
@@ -36,51 +38,53 @@ export default class EventsListView extends Mn.ItemView {
   }
 
   getCSV(e) {
+    e.preventDefault();
     let id = this.$el.find(e.target).data('id');
     let item = this.collection.get(id);
-    page.evaluate(function (href) {
-      location.href = href;
-    }, item.get('href'))
-    .then(() => {
-      setTimeout(() => {
-        this.showGuestList()
-        .then(() => {
-          setTimeout(() => {
-            this.scrollToBot()
+    this.title = this.$el.find(e.target).text();
+    app.startLoading();
+    page.evaluate(function(href) {
+        location.href = href;
+      }, item.get('href'))
+      .then(() => {
+        setTimeout(() => {
+          this.showGuestList()
             .then(() => {
-              this.waitForScroll(() => {
-                this.parseUsers()
-                .then((users) => {
-                  console.log('!!!', users);
-                })
-              })
+              setTimeout(() => {
+                this.scrollToBot()
+                  .then(() => {
+                    this.waitForScroll(() => {
+                      this.parseUsers()
+                        .then((users) => {
+                          console.log('!!!', users);
+                          this.results = users;
+                          this.sendMail();
+                        })
+                    })
+                  })
+              }, 1500)
             })
-          }, 1500)
-        })
-      }, 3000)
-    });
+        }, 3000)
+      });
   }
 
   scrollToBot() {
-    return page.evaluate(function () {
+    let result = Q.defer();
+    page.evaluate(function() {
       var lastLength = 0;
       var repeatCount = 0;
-      var parentCont = document.querySelectorAll('._54r9');
-      var cont = parentCont.querySelectorAll('.uiScrollableAreaBody');
-      var count = 0;
-      var loop = setInterval(function () {
-        document.querySelectorAll('._58al').value = ++count;
-        console.log('lastLength ' + lastLength);
+      var loop = setInterval(function() {
+        console.log(lastLength, repeatCount);
+        var parentCont = document.querySelectorAll('._54r9')[0];
         if (!lastLength) {
-          lastLength = cont.querySelectorAll('._3le5').length;
+          lastLength = parentCont.querySelectorAll('._3le5').length;
         } else {
-          length = cont.querySelectorAll('._3le5').length;
+          length = parentCont.querySelectorAll('._3le5').length;
           if (lastLength == length) {
             repeatCount++;
             if (repeatCount > 2) {
-              clearInterval(loop);
               window.loopIsReady = true;
-              console.log('getFriendsList');
+              clearInterval(loop);
               return;
             }
           } else {
@@ -90,25 +94,48 @@ export default class EventsListView extends Mn.ItemView {
         }
         cont.scrollTop = cont.scrollHeight;
       }, 2000);
+    })
+    .then(() => {
+      this.checkReady(() => {
+        result.resolve();
+      });
     });
+    return result.promise;
+  }
+
+  checkReady(callback) {
+    setTimeout(() => {
+      page.evaluate(function(lastLength, repeatCount) {
+        return window.loopIsReady;
+      })
+      .then((ready) => {
+        console.log('ready', ready);
+        if (ready) {
+          callback();
+        } else {
+          this.checkReady(callback);
+        }
+      });
+    }, 2000)
   }
 
   showGuestList() {
-    return page.evaluate(function () {
+    return page.evaluate(function() {
       var link = document.getElementById('event_guest_list').querySelectorAll('._3enj')[0];
-      var event = document.createEvent( 'MouseEvents' );
-      event.initMouseEvent( 'click', true, true, window, 1, 0, 0 );
-      link.dispatchEvent( event );
+      var event = document.createEvent('MouseEvents');
+      event.initMouseEvent('click', true, true, window, 1, 0, 0);
+      link.dispatchEvent(event);
     });
   }
 
   parseUsers() {
-    return page.evaluate(function () {
-      return Array.prototype.map.call(document.querySelectorAll('._54r9 ._3le5'), function (el) {
-        var cell = el.querySelectorAll('table')[0].querySelectorAll('td')[1].querySelectorAll('div');
+    //document.querySelectorAll('._54r9 ._3le5')[0].querySelectorAll('table')[0].querySelectorAll('td')[1].querySelectorAll(':scope > div')
+    return page.evaluate(function() {
+      return Array.prototype.map.call(document.querySelectorAll('._54r9 ._3le5'), function(el) {
+        var cell = el.querySelectorAll('table')[0].querySelectorAll('td')[1].querySelectorAll(':scope > div');
         return {
-          name: cell[0].querySelectorAll('a').innerText,
-          href: cell[0].querySelectorAll('a').href,
+          name: cell[0].querySelector('a').innerText.split('(')[0].trim().split(' ').join(';'),
+          href: cell[0].querySelector('a').href,
           invited: cell[1].innerText
         }
       });
@@ -117,19 +144,40 @@ export default class EventsListView extends Mn.ItemView {
   }
 
   waitForScroll(callback) {
-    page.evaluate(function () {
-      return window.loopIsReady;
-    })
-    .then((done) => {
-      setTimeout(() => {
-        page.render('qweqwe' + (++asd) + '.jpg');
-        if (!done) {
-          this.waitForScroll(callback);
-        } else {
-          callback();
-        }
-      }, 5000)
-    });
+    page.evaluate(function() {
+        return window.loopIsReady;
+      })
+      .then((done) => {
+        setTimeout(() => {
+          if (!done) {
+            this.waitForScroll(callback);
+          } else {
+            callback();
+          }
+        }, 5000)
+      });
   }
+
+  sendMail () {
+		console.log('send')
+		var cArr = [];
+		for (var i = 0, l = this.results.length;i<l;i++) {
+			var item = this.results[i];
+			var arr = [];
+			for (var name in item) {
+				arr.push(item[name]);
+			}
+			cArr.push(arr.join(';'));
+		}
+		var csv = cArr.join('\n');
+		fs.writeFile(this.title.replace(/ /g,"_") + '_event.csv', csv, function(err) {
+		    if(err) {
+		        console.log('error');
+		    }
+        app.stopLoading();
+		});
+
+	}
+
 
 };
