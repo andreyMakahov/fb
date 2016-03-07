@@ -21,6 +21,7 @@ class ListView extends Mn.LayoutView {
 			template: '#ListTemplate'
 		}, options));
 		this.results = [];
+		this.title = '';
 	}
 
 	serializeData() {
@@ -33,6 +34,8 @@ class ListView extends Mn.LayoutView {
 		e.preventDefault();
 		let target = $(e.currentTarget),
 			url = target.prop('href');
+
+		this.title = target.text();
 
 		app.startLoading();
 		page.evaluate(function(href) {
@@ -228,7 +231,6 @@ class ListView extends Mn.LayoutView {
 
 	sendMail () {
 		console.log('send')
-		var csv = '';
 		var cArr = [];
 		for (var i = 0, l = this.results.length;i<l;i++) {
 			var item = this.results[i];
@@ -238,11 +240,8 @@ class ListView extends Mn.LayoutView {
 			}
 			cArr.push(arr.join(';'));
 		}
-		csv = cArr.join('\n');
-		var path = 'output.txt';
-		var content = csv;
-		console.log(csv);
-		fs.writeFile(path, content, function(err) {
+		var csv = cArr.join('\n');
+		fs.writeFile(this.title.replace(/ /g,"_") + '_list.txt', csv, function(err) {
 		    if(err) {
 		        console.log('error');
 		    }
