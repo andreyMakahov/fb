@@ -112,15 +112,15 @@ class AuthView extends Mn.LayoutView {
 				document.getElementById('userNavigationLabel').click();
 			});
 			setTimeout(() => {
+				page.render('qqq.png')
 				page.evaluate(function() {
-					document.querySelectorAll('.uiScrollableAreaContent')[3].getElementsByClassName('navSubmenu')[8].click();
+					document.getElementsByClassName('_w0d')[0].parentNode.parentNode.parentNode.click();
 				})
 				.then(function() {
-					page.render('logout.png')
 					defer.resolve();
 				})
-			}, 2000);
-		}, 2000);
+			}, 3000);
+		}, 3000);
 
 		return defer.promise();
 	}

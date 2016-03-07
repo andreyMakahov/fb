@@ -41,6 +41,7 @@ class ListView extends Mn.LayoutView {
 		this.title = target.text();
 
 		app.startLoading();
+		console.log(url)
 		page.evaluate(function(href) {
 			location.href = href;
 		}, url)
@@ -48,8 +49,9 @@ class ListView extends Mn.LayoutView {
 
 			setTimeout(() => {
 				page.evaluate(function () {
+					var box;
 					window.___finish = false;
-					var box = document.getElementById('friend_list_members_box');
+					box = document.getElementById('friend_list_members_box');
 					var element;
 					if(box) {
 						element = box
@@ -66,15 +68,16 @@ class ListView extends Mn.LayoutView {
 						var repeatCount = 0;
 
 						var loop = setInterval(function () {
-							var cont = document.getElementsByClassName('fbProfileBrowserListContainer')[1].getElementsByClassName('friendListItem')[0].parentElement.parentElement.parentElement.parentElement;
 							console.log('lastLength ' + lastLength);
+							var el = document.getElementsByClassName('fbProfileBrowserListContainer')[1],
+								len = el && el.getElementsByClassName('friendListItem').length;
 							if (!lastLength) {
-								lastLength = document.getElementsByClassName('fbProfileBrowserListContainer')[1].getElementsByClassName('friendListItem').length;
+								lastLength = len;
 							} else {
-								length = document.getElementsByClassName('fbProfileBrowserListContainer')[1].getElementsByClassName('friendListItem').length;
+								length = len;
 								if (lastLength == length) {
 									repeatCount++;
-									if (repeatCount > 2) {
+									if (repeatCount > 2 || (lastLength === 0 && length === 0)) {
 										clearInterval(loop);
 										window.___finish = true;
 									}
@@ -83,7 +86,10 @@ class ListView extends Mn.LayoutView {
 									repeatCount = 0;
 								}
 							}
-							cont.scrollTop = cont.scrollHeight;
+							var cont = el && el.getElementsByClassName('friendListItem')[0].parentElement.parentElement.parentElement.parentElement;
+							if(cont) {
+								cont.scrollTop = cont.scrollHeight;
+							}
 						}, 2000);
 					} else {
 						window.___finish = true;
@@ -91,6 +97,7 @@ class ListView extends Mn.LayoutView {
 					return window.___finish;
 				})
 				.then(() => {
+					page.render('eee.png')
 					this.checkFinish();
 				})	
 				
@@ -109,7 +116,7 @@ class ListView extends Mn.LayoutView {
 				setTimeout(this.checkFinish.bind(this), 1000);
 			} else {
 				page.evaluate(function() {
-					return document.getElementsByClassName('fbProfileBrowserListContainer')[1];
+					return typeof document != 'undefined' && document.getElementsByClassName('fbProfileBrowserListContainer')[1];
 				})
 				.then((issetDomElem) => {
 					if(issetDomElem) {
@@ -242,7 +249,7 @@ class ListView extends Mn.LayoutView {
 						});
 					}, 2000);
 				});
-			}, 2500);
+			}, 3000);
 		})
 	}
 
