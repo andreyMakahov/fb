@@ -32,6 +32,9 @@ class ListView extends Mn.LayoutView {
 
 	parseItem(e) {
 		e.preventDefault();
+
+		this.results = [];
+
 		let target = $(e.currentTarget),
 			url = target.prop('href');
 
@@ -46,40 +49,45 @@ class ListView extends Mn.LayoutView {
 			setTimeout(() => {
 				page.evaluate(function () {
 					window.___finish = false;
-					var element = document
-						.getElementById('friend_list_members_box')
-						.getElementsByClassName('fbFriendListMemberBoxTitle')[0]
-						.getElementsByTagName('a')[0];
+					var box = document.getElementById('friend_list_members_box');
+					var element;
+					if(box) {
+						element = box
+							.getElementsByClassName('fbFriendListMemberBoxTitle')[0]
+							.getElementsByTagName('a')[0];
 
-					// create a mouse click event
-					var event = document.createEvent( 'MouseEvents' );
-					event.initMouseEvent( 'click', true, true, window, 1, 0, 0 );
+						// create a mouse click event
+						var event = document.createEvent( 'MouseEvents' );
+						event.initMouseEvent( 'click', true, true, window, 1, 0, 0 );
 
-					// send click to element
-					element.dispatchEvent( event );
-					var lastLength = 0;
-					var repeatCount = 0;
+						// send click to element
+						element.dispatchEvent( event );
+						var lastLength = 0;
+						var repeatCount = 0;
 
-					var loop = setInterval(function () {
-						var cont = document.getElementsByClassName('fbProfileBrowserListContainer')[1].getElementsByClassName('friendListItem')[0].parentElement.parentElement.parentElement.parentElement;
-						console.log('lastLength ' + lastLength);
-						if (!lastLength) {
-							lastLength = document.getElementsByClassName('fbProfileBrowserListContainer')[1].getElementsByClassName('friendListItem').length;
-						} else {
-							length = document.getElementsByClassName('fbProfileBrowserListContainer')[1].getElementsByClassName('friendListItem').length;
-							if (lastLength == length) {
-								repeatCount++;
-								if (repeatCount > 2) {
-									clearInterval(loop);
-									window.___finish = true;
-								}
+						var loop = setInterval(function () {
+							var cont = document.getElementsByClassName('fbProfileBrowserListContainer')[1].getElementsByClassName('friendListItem')[0].parentElement.parentElement.parentElement.parentElement;
+							console.log('lastLength ' + lastLength);
+							if (!lastLength) {
+								lastLength = document.getElementsByClassName('fbProfileBrowserListContainer')[1].getElementsByClassName('friendListItem').length;
 							} else {
-								lastLength = length;
-								repeatCount = 0;
+								length = document.getElementsByClassName('fbProfileBrowserListContainer')[1].getElementsByClassName('friendListItem').length;
+								if (lastLength == length) {
+									repeatCount++;
+									if (repeatCount > 2) {
+										clearInterval(loop);
+										window.___finish = true;
+									}
+								} else {
+									lastLength = length;
+									repeatCount = 0;
+								}
 							}
-						}
-						cont.scrollTop = cont.scrollHeight;
-					}, 2000);
+							cont.scrollTop = cont.scrollHeight;
+						}, 2000);
+					} else {
+						window.___finish = true;
+					}
 					return window.___finish;
 				})
 				.then(() => {
@@ -100,7 +108,16 @@ class ListView extends Mn.LayoutView {
 			if(!finish){
 				setTimeout(this.checkFinish.bind(this), 1000);
 			} else {
-				this.parseList();
+				page.evaluate(function() {
+					return document.getElementsByClassName('fbProfileBrowserListContainer')[1];
+				})
+				.then((issetDomElem) => {
+					if(issetDomElem) {
+						this.parseList();
+					} else {
+						app.stopLoading();
+					}
+				})
 			}
 		})
 	}
