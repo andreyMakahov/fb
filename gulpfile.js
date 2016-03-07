@@ -5,7 +5,8 @@ var gulp = require('gulp'),
     clean = require('gulp-clean'),
     sync = require('gulp-sync')(gulp),
     webpack = require('webpack-stream'),
-    webserver = require('gulp-webserver');
+    webserver = require('gulp-webserver'),
+    builder = require('gulp-nw-builder');
 
 gulp.task('default', sync.sync([
     [

@@ -1,6 +1,5 @@
 import Mn from 'backbone.marionette';
 import $ from 'jquery';
-import Router from './Router/Router.js';
 import LayoutView from './Layout/LayoutView.js';
 import AuthView from './Auth/AuthView.js';
 import Mustache from 'mustache.js';
