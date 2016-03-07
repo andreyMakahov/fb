@@ -108,16 +108,18 @@ class AuthView extends Mn.LayoutView {
 			location.href = 'https://facebook.com/login';
 		});
 		setTimeout(() => {
+			page.render('aaa.png')
 			page.evaluate(function() {
 				document.getElementById('userNavigationLabel').click();
 			});
 			setTimeout(() => {
-				page.render('qqq.png')
 				page.evaluate(function() {
 					document.getElementsByClassName('_w0d')[0].parentNode.parentNode.parentNode.click();
 				})
 				.then(function() {
-					defer.resolve();
+					setTimeout(function() {
+						defer.resolve();
+					}, 2000);
 				})
 			}, 3000);
 		}, 3000);

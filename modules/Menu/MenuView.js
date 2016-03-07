@@ -39,7 +39,6 @@ class MenuView extends Mn.LayoutView {
 				rootView.getRegion('login').show(new AuthView());
 				rootView.getRegion('menu').currentView && rootView.getRegion('menu').currentView.remove();
 				rootView.getRegion('list').currentView && rootView.getRegion('list').currentView.remove();
-				rootView.getRegion('events').currentView && rootView.getRegion('events').currentView.remove();
 				app.stopLoading();
 				break;
 			case 'ListView':
@@ -48,8 +47,7 @@ class MenuView extends Mn.LayoutView {
 				});
 				break;
 			case 'EventListView':
-				rootView.getRegion('list').currentView && rootView.getRegion('list').currentView.remove();
-				app.rootView.getRegion('events').show(new ELV());
+				app.rootView.getRegion('list').show(new ELV());
 				app.stopLoading();
 				break;
 		}
@@ -67,7 +65,6 @@ class MenuView extends Mn.LayoutView {
 						app.rootView.getRegion('list').show(new ListView({
 							list: list
 						}));
-						app.rootView.getRegion('events').currentView && app.rootView.getRegion('events').currentView.remove();
 						callback();
 					});
 				}, 2000);

@@ -7,8 +7,7 @@ class LayoutView extends Mn.LayoutView {
 			regions: {
 				menu: '#menu',
 				login: '#login',
-				list: '#list',
-				events: '#events'
+				list: '#list'
 			}
 		})
 	}
