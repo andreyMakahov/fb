@@ -31,7 +31,6 @@ $(document).ready(() => {
 
 	app.rootView = new LayoutView();
 	app.rootView.getRegion('login').show(new AuthView());
-
 	
 	app.start();
 });

@@ -5,8 +5,10 @@ class LayoutView extends Mn.LayoutView {
 		super({
 			el: ".layout",
 			regions: {
+				menu: '#menu',
 				login: '#login',
-				list: '#list'
+				list: '#list',
+				events: '#events'
 			}
 		})
 	}

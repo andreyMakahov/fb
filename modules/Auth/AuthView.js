@@ -1,5 +1,7 @@
 import Mn from 'backbone.marionette';
 import ListView from '../List/ListView.js';
+import MenuView from '../Menu/MenuView.js';
+import $ from 'jquery';
 
 class AuthView extends Mn.LayoutView {
 	
@@ -14,8 +16,8 @@ class AuthView extends Mn.LayoutView {
 
 	events () {
 		return {
-			'click @ui.submitBtn': 'login',
-			'submit @ui.loginForm': 'login'
+			'click @ui.submitBtn': 'onLogin',
+			'submit @ui.loginForm': 'onLogin'
 		};
 	}
 
@@ -26,10 +28,9 @@ class AuthView extends Mn.LayoutView {
 		this.listIndex = 0;
 	}
 
-	login(e) {
+	onLogin(e) {
 		e.preventDefault();
 		
-
 		let self = this;
 
 		let email = this.ui.email.val();
@@ -38,62 +39,78 @@ class AuthView extends Mn.LayoutView {
 		// todo че делать если не правильный пароль
 		if(email.length && password.length) {
 			app.startLoading();
-			page.open('https://facebook.com/login')
-			.then(function(status) {
-				page.evaluate(function(params) {
-				    var emailInput = document.getElementsByName("email")[0];
-					var passInput = document.getElementsByName("pass")[0];
-					var form = document.getElementById('login_form');
-					emailInput.value = params.email;
-					passInput.value = params.password;
-					
-					return form.submit();
-				}, {
-					email: email,
-					password: password
+			if(app.authorized) {
+				this.logout()
+				.then(() => {
+					this.login(email, password);
 				})
-				.then(function() {
-					self.goToLists();
-				});
+			} else {
+				this.login(email, password);
+			}
+		}
+	}
+
+	login(email, password) {
+		if(app.pageOnened) {
+			page.evaluate(function() {
+				location.href = 'https://facebook.com/login';
+			});
+			setTimeout(() => {
+				this._login(email, password);
+			}, 3000)
+		} else {
+			page.open('https://facebook.com/login')
+			.then(() => {
+				app.pageOnened = true;
+				this._login(email, password);
 			});
 		}
 	}
 
-	goToLists() {
-		setTimeout(() => {
-			page.evaluate((params) => {
-			    location.href = 'https://www.facebook.com/bookmarks/lists';
-			})
-			.then(() => {
-				setTimeout(() => {
-					this.parseList()
-					.then((list) => {
-						app.rootView.getRegion('list').show(new ListView({
-							list: list
-						}));
-						this.remove();
-						app.stopLoading();
-					});
-				}, 2000);
-			});
-		}, 2000)
+	_login(email, password) {
+		let self = this;
+		page.evaluate(function(params) {
+		    var emailInput = document.getElementsByName("email")[0];
+			var passInput = document.getElementsByName("pass")[0];
+			var form = document.getElementById('login_form');
+			emailInput.value = params.email;
+			passInput.value = params.password;
+			
+			return form.submit();
+		}, {
+			email: email,
+			password: password
+		})
+		.then(() => {
+			page.render('login.png')
+			self.remove();
+			app.rootView.getRegion('menu').show(new MenuView());
+			app.authorized = true;
+			app.stopLoading();
+		});
 	}
 
-	parseList() {
-		return page.evaluate(function() {
-			var items = document.getElementById('bookmarksSeeAllEntSection').getElementsByClassName('sideNavItem');
-			var result = [];
-			for(let i = 0; i < items.length; i++) {
-				// Ограниченные не учитываем
-				if(items[i].getElementsByTagName('A').length > 1) {
-					result.push({
-						title: items[i].getElementsByClassName('linkWrap')[0].getElementsByTagName('span')[0].innerHTML,
-						link: items[i].getElementsByTagName('A')[1].href
-					});
-				}
-			}
-			return result;
+	logout() {
+		let defer = $.Deferred();
+		page.evaluate(function() {
+			location.href = 'https://facebook.com/login';
 		});
+		setTimeout(() => {
+			page.evaluate(function() {
+				document.getElementById('userNavigationLabel').click();
+			});
+			setTimeout(() => {
+				page.evaluate(function() {
+					document.querySelectorAll('.uiScrollableAreaContent')[3].getElementsByClassName('navSubmenu')[8].click();
+				})
+				.then(function() {
+					page.render('logout.png')
+					defer.resolve();
+				})
+			}, 2000);
+		}, 2000);
+
+		return defer.promise();
 	}
 
 }
