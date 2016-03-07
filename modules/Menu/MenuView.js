@@ -2,6 +2,7 @@ import Mn from 'backbone.marionette';
 import $ from 'jquery';
 import AuthView from '../Auth/AuthView.js';
 import ListView from '../List/ListView.js';
+import ELV from '../Events/EventsListView.js';
 
 class MenuView extends Mn.LayoutView {
 	
@@ -47,7 +48,9 @@ class MenuView extends Mn.LayoutView {
 				});
 				break;
 			case 'EventListView':
-
+				rootView.getRegion('list').currentView && rootView.getRegion('list').currentView.remove();
+				app.rootView.getRegion('events').show(new ELV());
+				app.stopLoading();
 				break;
 		}
 	}

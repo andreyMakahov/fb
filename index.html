@@ -9,6 +9,7 @@
 		<div id="menu"></div>
 		<div id="login"></div>
 		<div id="list"></div>
+		<div id="events"></div>
 	</div>
 	<div class="spinner"></div>
 	<script type="text/javascript">
@@ -16,6 +17,9 @@
 		phantom.then(function(ph) {
 			ph.createPage().then(function(page) {
 				window.page = page;
+        page.property('onConsoleMessage', function (msg) {
+        	console.log(msg);
+        });
 			});
 		});
 		window.fs = require('fs');

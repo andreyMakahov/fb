@@ -4,7 +4,7 @@ import MenuView from '../Menu/MenuView.js';
 import $ from 'jquery';
 
 class AuthView extends Mn.LayoutView {
-	
+
 	ui () {
 		return {
 			email: '#inputEmail',
