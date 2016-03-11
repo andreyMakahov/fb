@@ -1,7 +1,7 @@
 var NwBuilder = require('nw-builder');
 var nw = new NwBuilder({
-    files: '/home/dron/facebook/**/*',
-    platforms: ['linux64'],
+    files: 'd:/repos/fb/**/*',
+    platforms: ['win64', 'osx64', 'linux64'],
     version: '0.12.3',
     buildDir: 'dest'
 });

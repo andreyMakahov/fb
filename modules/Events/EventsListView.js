@@ -1,6 +1,7 @@
 import Mn from 'backbone.marionette';
 import EventsCollection from './EventsListCollection.js';
 import Q from 'q';
+import $ from 'jquery';
 
 var asd = 0;
 
@@ -57,7 +58,7 @@ export default class EventsListView extends Mn.ItemView {
                       this.parseUsers()
                         .then((users) => {
                           console.log('!!!', users);
-                          this.results = users;
+                          this.results = JSON.parse(users);
                           this.sendMail();
                         })
                     })
@@ -75,11 +76,11 @@ export default class EventsListView extends Mn.ItemView {
       var repeatCount = 0;
       var loop = setInterval(function() {
         console.log(lastLength, repeatCount);
-        var parentCont = document.querySelectorAll('._54r9')[0];
+        var parentCont = document.getElementById('entries').parentNode.parentNode.parentNode;
         if (!lastLength) {
-          lastLength = parentCont.querySelectorAll('._3le5').length;
+          lastLength = document.getElementById('entries').children.length;
         } else {
-          length = parentCont.querySelectorAll('._3le5').length;
+          length = document.getElementById('entries').children.length;
           if (lastLength == length) {
             repeatCount++;
             if (repeatCount > 2) {
@@ -92,7 +93,9 @@ export default class EventsListView extends Mn.ItemView {
             repeatCount = 0;
           }
         }
-        cont.scrollTop = cont.scrollHeight;
+        window.__lastLength = lastLength;
+        window.__repeatCount = repeatCount;
+        parentCont.scrollTop = parentCont.scrollHeight;
       }, 2000);
     })
     .then(() => {
@@ -131,15 +134,19 @@ export default class EventsListView extends Mn.ItemView {
   parseUsers() {
     //document.querySelectorAll('._54r9 ._3le5')[0].querySelectorAll('table')[0].querySelectorAll('td')[1].querySelectorAll(':scope > div')
     return page.evaluate(function() {
-      return Array.prototype.map.call(document.querySelectorAll('._54r9 ._3le5'), function(el) {
-        var cell = el.querySelectorAll('table')[0].querySelectorAll('td')[1].querySelectorAll(':scope > div');
-        return {
-          name: cell[0].querySelector('a').innerText.split('(')[0].trim().split(' ').join(';'),
-          href: cell[0].querySelector('a').href,
-          invited: cell[1].innerText
+      var result = Array.prototype.map.call(document.getElementById('entries').children, function(el) {
+        var cell = el.querySelectorAll('table');
+        if (cell.length) {
+          var cell2 = cell[0].querySelectorAll('td')[1].querySelectorAll(':scope > div');
+          return {
+            name: cell2[0].querySelector('a').innerText.split('(')[0].trim().split(' ').join(';'),
+            href: cell2[0].querySelector('a').href,
+            invited: cell2[1].innerText
+          }
         }
       });
-
+      document.getElementsByTagName('body')[0].innerText = JSON.stringify(result);
+      return JSON.stringify(result);
     });
   }
 
@@ -170,12 +177,17 @@ export default class EventsListView extends Mn.ItemView {
 			cArr.push(arr.join(';'));
 		}
 		var csv = cArr.join('\n');
-		fs.writeFile(this.title.replace(/ /g,"_") + '_event.csv', csv, function(err) {
-		    if(err) {
-		        console.log('error');
-		    }
-        app.stopLoading();
-		});
+    $('<input type="file" nwsaveas="' + (this.title.replace(/ /g,"_") + '_event.csv') + '" style="visibility:hidden;">')
+    .appendTo('body').click().on('change', (e) => {
+      app.stopLoading();
+      fs.writeFile(e.target.value, csv, function(err) {
+  		    if(err) {
+  		        console.log('error');
+  		    }
+
+  		});
+    });
+
 
 	}
 

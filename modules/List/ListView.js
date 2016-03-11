@@ -264,12 +264,15 @@ class ListView extends Mn.LayoutView {
 			cArr.push(arr.join(';'));
 		}
 		var csv = cArr.join('\n');
-		fs.writeFile(this.title.replace(/ /g,"_") + '_list.txt', csv, function(err) {
-		    if(err) {
-		        console.log('error');
-		    }
-		});
-		app.stopLoading();
+		$('<input type="file" nwsaveas="' + (this.title.replace(/ /g,"_") + '_list.csv') + '" style="visibility:hidden;">')
+    .appendTo('body').click().on('change', (e) => {
+      app.stopLoading();
+      fs.writeFile(e.target.value, csv, function(err) {
+  		    if(err) {
+  		        console.log('error');
+  		    }
+  		});
+    });
 	}
 
 }
