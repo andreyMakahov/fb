@@ -43,30 +43,101 @@ export default class EventsListView extends Mn.ItemView {
     let id = this.$el.find(e.target).data('id');
     let item = this.collection.get(id);
     this.title = this.$el.find(e.target).text();
+    this.results = [];
     app.startLoading();
     page.evaluate(function(href) {
         location.href = href;
       }, item.get('href'))
       .then(() => {
         setTimeout(() => {
-          this.showGuestList()
+        console.log('process going list');
+          this.processGoingList()
+          .then(() => {
+            console.log('process maybe list');
+            this.processMaybeList()
             .then(() => {
-              setTimeout(() => {
-                this.scrollToBot()
-                  .then(() => {
-                    this.waitForScroll(() => {
-                      this.parseUsers()
-                        .then((users) => {
-                          console.log('!!!', users);
-                          this.results = JSON.parse(users);
-                          this.sendMail();
-                        })
-                    })
-                  })
-              }, 1500)
+              console.log('process inv list');
+              this.processInvitedList()
+              .then(() => {
+                console.log('process cant list');
+                this.processCantList()
+                .then(() => {
+                  this.sendMail();
+                })
+              })
             })
-        }, 3000)
+          })
+        }, 3000);
+      })
+  }
+
+  processGoingList() {
+    var defer = $.Deferred();
+    this.showGuestList()
+      .then(() => {
+        setTimeout(() => {
+          this.processUsers(defer, 'going');
+        }, 1500)
       });
+      return defer.promise();
+  }
+
+  processMaybeList() {
+    var defer = $.Deferred();
+    page.evaluate(function() {
+      var scrolable = document.querySelectorAll('.uiScrollableArea'); 
+      var link = scrolable[scrolable.length - 1].previousSibling.querySelectorAll('a')[1];
+      link.click();
+    })
+    .then(() => {
+      setTimeout(() => {
+        this.processUsers(defer, 'maybe');
+      }, 3000)
+    });
+    return defer.promise();
+  }
+
+  processInvitedList() {
+    var defer = $.Deferred();
+    page.evaluate(function() {
+      var scrolable = document.querySelectorAll('.uiScrollableArea'); 
+      var link = scrolable[scrolable.length - 1].previousSibling.querySelectorAll('a')[2];
+      link.click();
+    })
+    .then(() => {
+      setTimeout(() => {
+        this.processUsers(defer, 'invited');
+      }, 3000)
+    });
+    return defer.promise();
+  }
+
+  processCantList() {
+    var defer = $.Deferred();
+    page.evaluate(function() {
+      var scrolable = document.querySelectorAll('.uiScrollableArea'); 
+      var link = scrolable[scrolable.length - 1].previousSibling.querySelectorAll('a')[3];
+      link.click();
+    })
+    .then(() => {
+      setTimeout(() => {
+        this.processUsers(defer, 'can\'t');
+      }, 3000)
+    });
+    return defer.promise();
+  }
+
+  processUsers(defer, status) {
+    this.scrollToBot()
+    .then(() => {
+      this.waitForScroll(() => {
+        this.parseUsers(status)
+          .then((users) => {
+            this.results = this.results.concat(JSON.parse(users));
+            defer.resolve();
+          })
+      })
+    });
   }
 
   scrollToBot() {
@@ -76,11 +147,15 @@ export default class EventsListView extends Mn.ItemView {
       var repeatCount = 0;
       var loop = setInterval(function() {
         console.log(lastLength, repeatCount);
-        var parentCont = document.getElementById('entries').parentNode.parentNode.parentNode;
+
+      var scrolable = document.querySelectorAll('.uiScrollableAreaContent'),
+        length = scrolable.length,
+        parentCont = scrolable[length - 1];
+
         if (!lastLength) {
-          lastLength = document.getElementById('entries').children.length;
+          lastLength = parentCont.children.length;
         } else {
-          length = document.getElementById('entries').children.length;
+          length = parentCont.children.length;
           if (lastLength == length) {
             repeatCount++;
             if (repeatCount > 2) {
@@ -95,7 +170,7 @@ export default class EventsListView extends Mn.ItemView {
         }
         window.__lastLength = lastLength;
         window.__repeatCount = repeatCount;
-        parentCont.scrollTop = parentCont.scrollHeight;
+        parentCont.parentNode.parentNode.scrollTop = parentCont.scrollHeight;
       }, 2000);
     })
     .then(() => {
@@ -131,23 +206,31 @@ export default class EventsListView extends Mn.ItemView {
     });
   }
 
-  parseUsers() {
+  parseUsers(status) {
     //document.querySelectorAll('._54r9 ._3le5')[0].querySelectorAll('table')[0].querySelectorAll('td')[1].querySelectorAll(':scope > div')
-    return page.evaluate(function() {
-      var result = Array.prototype.map.call(document.getElementById('entries').children, function(el) {
+    return page.evaluate(function(status) {
+      var scrolable = document.querySelectorAll('.uiScrollableAreaContent'),
+        contLen = scrolable.length,
+        list = scrolable[contLen - 1];
+
+      list = Array.prototype.filter.call(list.children, function(el) {
+        return el.querySelectorAll('table').length;
+      });
+
+      var result = Array.prototype.map.call(list, function(el) {
         var cell = el.querySelectorAll('table');
         if (cell.length) {
           var cell2 = cell[0].querySelectorAll('td')[1].querySelectorAll(':scope > div');
           return {
             name: cell2[0].querySelector('a').innerText.split('(')[0].trim().split(' ').join(';'),
             href: cell2[0].querySelector('a').href,
-            invited: cell2[1].innerText
+            invited: cell2[1].innerText,
+            status: status
           }
         }
       });
-      document.getElementsByTagName('body')[0].innerText = JSON.stringify(result);
       return JSON.stringify(result);
-    });
+    }, status);
   }
 
   waitForScroll(callback) {
@@ -166,7 +249,7 @@ export default class EventsListView extends Mn.ItemView {
   }
 
   sendMail () {
-		console.log('send')
+		console.log('send');
 		var cArr = [];
 		for (var i = 0, l = this.results.length;i<l;i++) {
 			var item = this.results[i];
