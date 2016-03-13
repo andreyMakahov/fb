@@ -85,7 +85,7 @@ export default class EventsListView extends Mn.ItemView {
   processMaybeList() {
     var defer = $.Deferred();
     page.evaluate(function() {
-      var scrolable = document.querySelectorAll('.uiScrollableArea'); 
+      var scrolable = document.querySelectorAll('.uiScrollableArea');
       var link = scrolable[scrolable.length - 1].previousSibling.querySelectorAll('a')[1];
       link.click();
     })
@@ -100,7 +100,7 @@ export default class EventsListView extends Mn.ItemView {
   processInvitedList() {
     var defer = $.Deferred();
     page.evaluate(function() {
-      var scrolable = document.querySelectorAll('.uiScrollableArea'); 
+      var scrolable = document.querySelectorAll('.uiScrollableArea');
       var link = scrolable[scrolable.length - 1].previousSibling.querySelectorAll('a')[2];
       link.click();
     })
@@ -115,7 +115,7 @@ export default class EventsListView extends Mn.ItemView {
   processCantList() {
     var defer = $.Deferred();
     page.evaluate(function() {
-      var scrolable = document.querySelectorAll('.uiScrollableArea'); 
+      var scrolable = document.querySelectorAll('.uiScrollableArea');
       var link = scrolable[scrolable.length - 1].previousSibling.querySelectorAll('a')[3];
       link.click();
     })
@@ -158,7 +158,7 @@ export default class EventsListView extends Mn.ItemView {
           length = parentCont.children.length;
           if (lastLength == length) {
             repeatCount++;
-            if (repeatCount > 2) {
+            if (repeatCount > 5) {
               window.loopIsReady = true;
               clearInterval(loop);
               return;
@@ -221,8 +221,13 @@ export default class EventsListView extends Mn.ItemView {
         var cell = el.querySelectorAll('table');
         if (cell.length) {
           var cell2 = cell[0].querySelectorAll('td')[1].querySelectorAll(':scope > div');
+          var name = cell2[0].querySelector('a').innerText.split('(')[0].trim().split(' ');
+          var toAdd = 3 - name.length;
+          while (toAdd--) {
+            name.push('');
+          }
           return {
-            name: cell2[0].querySelector('a').innerText.split('(')[0].trim().split(' ').join(';'),
+            name: name.join(';'),
             href: cell2[0].querySelector('a').href,
             invited: cell2[1].innerText,
             status: status
