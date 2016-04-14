@@ -15,7 +15,8 @@ export default class EventsListView extends Mn.ItemView {
 
   events() {
     return {
-      'click @ui.eventItem': 'getCSV'
+      'click @ui.eventItem': 'getCSV',
+      'click .more-info': 'setMore'
     };
   }
 
@@ -37,6 +38,108 @@ export default class EventsListView extends Mn.ItemView {
       collection: this.collection.toJSON()
     };
   }
+
+  fLoop (callback) {
+		console.log('fLoop', this.usersList.length);
+		let self = this;
+		if (this.usersList.length) {
+			var usr = this.usersList.splice(0, 1)[0];
+			if (usr) {
+				console.log(usr);
+				self.doFriend(usr, () => {
+					self.doFriendData(usr, () => {
+						self.fLoop(this.sendMail.bind(this));
+					});
+				});
+			}
+		} else {
+			callback();
+		}
+	}
+
+  doFriend(data, callback) {
+		var url = data.href;
+		console.log('doFriend', url, !!callback);
+		console.log('name', data.name);
+		page.evaluate(function(url) {
+			location.href = url;
+		}, url);
+		setTimeout(function() {
+			page.evaluate(function () {
+				return document.location.href;
+			})
+			.then((aboutUrl) => {
+				console.log('!!!!', aboutUrl + '/about?section=education');
+				data.url = aboutUrl;
+				callback();
+			});
+		}, 2000);
+	}
+
+  doFriendData(data, callback) {
+		var aboutUrl = data.url;
+		let self = this;
+
+		page.evaluate(function(aboutUrl) {
+			location.href = aboutUrl + '/about?section=education';
+		}, aboutUrl)
+		.then(() => {
+			setTimeout(() => {
+				page.evaluate(function(aboutUrl) {
+					var job = (function() {
+						var elems = document.getElementById('pagelet_eduwork').getElementsByTagName('*');
+						for (var i =0,l=elems.length;i<l;i++){
+							var elem = elems[i];
+							if (elem.getAttribute('data-pnref') == 'work') {
+								break;
+							}
+
+						}
+						if (elem){
+							var el = elem.getElementsByTagName('li')[0];
+							if (el) {
+								return el.innerText || el.textContent;
+							}
+						}
+						return false;
+					})();
+					return job;
+				}, aboutUrl)
+				.then((job) => {
+					console.log('after eval');
+					var result = [];
+					if (job) {
+						job = job.trim().split('\n');
+						for (var i = 0,l = job.length;i<l;i++){
+							if(job[i]){
+								result.push(job[i]);
+							}
+						}
+						console.log('job ', result);
+						data.job = result.join(' ');
+					} else {
+						data.job = false;
+					}
+
+					page.evaluate(function(aboutUrl) {
+						location.href = aboutUrl + '/friends';
+					}, aboutUrl);
+					setTimeout(() => {
+						page.evaluate(function() {
+							var elem = document.getElementsByName('Все друзья')[0];
+							return elem ? elem.getElementsByTagName('span')[1].innerText : undefined;
+						})
+						.then((fCount) => {
+							data.job = result.join(' ');
+							data.friendsCount = fCount;
+							self.results.push(data);
+							callback && callback();
+						});
+					}, 2000);
+				});
+			}, 3000);
+		})
+	}
 
   getCSV(e) {
     e.preventDefault();
@@ -62,13 +165,24 @@ export default class EventsListView extends Mn.ItemView {
                 console.log('process cant list');
                 this.processCantList()
                 .then(() => {
-                  this.sendMail();
+                  if (this.getInfo) {
+                    this.usersList = this.results;
+                    console.log(this.usersList);
+                    this.results = [];
+                    this.fLoop();
+                  } else {
+                    this.sendMail();
+                  }
                 })
               })
             })
           })
         }, 3000);
       })
+  }
+
+  setMore() {
+    this.getInfo = !this.getInfo;
   }
 
   processGoingList() {
@@ -258,13 +372,16 @@ export default class EventsListView extends Mn.ItemView {
 		var cArr = [];
 		for (var i = 0, l = this.results.length;i<l;i++) {
 			var item = this.results[i];
+      delete item.url;
 			var arr = [];
 			for (var name in item) {
 				arr.push(item[name]);
 			}
 			cArr.push(arr.join(';'));
 		}
+    console.log(item);
 		var csv = cArr.join('\n');
+    console.log(csv);
     $('<input type="file" nwsaveas="' + (this.title.replace(/ /g,"_") + '_event.csv') + '" style="visibility:hidden;">')
     .appendTo('body').click().on('change', (e) => {
       app.stopLoading();

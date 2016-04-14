@@ -14,6 +14,7 @@
 	<script type="text/javascript">
 		window.phantom = require('phantom').create();
 		phantom.then(function(ph) {
+      window.ph = ph;
 			ph.createPage().then(function(page) {
 				window.page = page;
         page.property('onConsoleMessage', function (msg) {
@@ -22,6 +23,15 @@
 			});
 		});
 		window.fs = require('fs');
+
+    var win = require('nw.gui').Window.get();
+
+    win.on('close', function() {
+      ph.exit();
+      win.close();
+      process.exit();
+      return true;
+    });
 	</script>
 	<script type="text/javascript" src="build/main.js"></script>
   </body>

@@ -8,29 +8,29 @@ import Spinner from './Spinner/Spinner.js';
 
 $(document).ready(() => {
 
-	phantom.onConsoleMessage = function (msg) {
-		console.log(msg);
-	};
+  phantom.onConsoleMessage = function(msg) {
+    console.log(msg);
+  };
 
-	Mn.Renderer.render = function(template, data){
-		var template = $(template).html();
-  		Mustache.parse(template); 
-	  	return Mustache.render(template, data);
-	};
+  Mn.Renderer.render = function(template, data) {
+    var template = $(template).html();
+    Mustache.parse(template);
+    return Mustache.render(template, data);
+  };
 
-	window.app = new Mn.Application();
+  window.app = new Mn.Application();
 
-	
-	app.startLoading = () => {
-		Spinner.show();
-	};
 
-	app.stopLoading = () => {
-		Spinner.hide();
-	};
+  app.startLoading = () => {
+    Spinner.show();
+  };
 
-	app.rootView = new LayoutView();
-	app.rootView.getRegion('login').show(new AuthView());
+  app.stopLoading = () => {
+    Spinner.hide();
+  };
 
-	app.start();
+  app.rootView = new LayoutView();
+  app.rootView.getRegion('login').show(new AuthView());
+
+  app.start();
 });
