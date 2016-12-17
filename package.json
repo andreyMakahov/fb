@@ -22,7 +22,8 @@
     "nw-builder": "^2.2.0",
     "phantom": "^2.0.4",
     "q": "^1.4.1",
-    "webpack-stream": "^3.1.0"
+    "webpack-stream": "^3.1.0",
+    "yargs": "^6.5.0"
   },
   "devDependencies": {
     "babel-core": "^6.6.5",

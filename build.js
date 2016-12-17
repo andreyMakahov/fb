@@ -1,6 +1,8 @@
 var NwBuilder = require('nw-builder');
+var args = require('yargs').argv;
+
 var nw = new NwBuilder({
-    files: 'd:/repos/fb/**/*',
+    files: args.path || 'd:/repos/fb/**/*',
     platforms: ['win64', 'osx64', 'linux64'],
     version: '0.12.3',
     buildDir: 'dest'

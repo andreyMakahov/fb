@@ -199,8 +199,7 @@ export default class EventsListView extends Mn.ItemView {
   processMaybeList() {
     var defer = $.Deferred();
     page.evaluate(function() {
-      var scrolable = document.querySelectorAll('.uiScrollableArea');
-      var link = scrolable[scrolable.length - 1].previousSibling.querySelectorAll('a')[1];
+      var link = document.querySelectorAll('._1y4a')[1];
       link.click();
     })
     .then(() => {
@@ -214,8 +213,8 @@ export default class EventsListView extends Mn.ItemView {
   processInvitedList() {
     var defer = $.Deferred();
     page.evaluate(function() {
-      var scrolable = document.querySelectorAll('.uiScrollableArea');
-      var link = scrolable[scrolable.length - 1].previousSibling.querySelectorAll('a')[2];
+        var link = document.querySelectorAll('._1y4a')[2];
+        link.click();
       link.click();
     })
     .then(() => {
@@ -229,8 +228,8 @@ export default class EventsListView extends Mn.ItemView {
   processCantList() {
     var defer = $.Deferred();
     page.evaluate(function() {
-      var scrolable = document.querySelectorAll('.uiScrollableArea');
-      var link = scrolable[scrolable.length - 1].previousSibling.querySelectorAll('a')[3];
+        var link = document.querySelectorAll('._1y4a')[3];
+        link.click();
       link.click();
     })
     .then(() => {
