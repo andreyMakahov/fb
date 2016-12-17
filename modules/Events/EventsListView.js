@@ -199,8 +199,9 @@ export default class EventsListView extends Mn.ItemView {
   processMaybeList() {
     var defer = $.Deferred();
     page.evaluate(function() {
-      var link = document.querySelectorAll('._1y4a')[1];
-      link.click();
+        var dialog = document.querySelectorAll('[role="dialog"]');
+        var link = dialog[dialog.length - 1].querySelectorAll('[data-intl-translation]')[1].parentNode;
+        link.click();
     })
     .then(() => {
       setTimeout(() => {
@@ -213,9 +214,9 @@ export default class EventsListView extends Mn.ItemView {
   processInvitedList() {
     var defer = $.Deferred();
     page.evaluate(function() {
-        var link = document.querySelectorAll('._1y4a')[2];
+        var dialog = document.querySelectorAll('[role="dialog"]');
+        var link = dialog[dialog.length - 1].querySelectorAll('[data-intl-translation]')[2].parentNode;
         link.click();
-      link.click();
     })
     .then(() => {
       setTimeout(() => {
@@ -228,9 +229,9 @@ export default class EventsListView extends Mn.ItemView {
   processCantList() {
     var defer = $.Deferred();
     page.evaluate(function() {
-        var link = document.querySelectorAll('._1y4a')[3];
+        var dialog = document.querySelectorAll('[role="dialog"]');
+        var link = dialog[dialog.length - 1].querySelectorAll('[data-intl-translation]')[3].parentNode;
         link.click();
-      link.click();
     })
     .then(() => {
       setTimeout(() => {
