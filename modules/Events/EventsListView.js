@@ -30,6 +30,9 @@ export default class EventsListView extends Mn.ItemView {
         console.log(this.collection);
         this.render();
         app.stopLoading();
+        if (!this.collection.models.length) {
+            alert('У вас пока нет событий');
+        }
       });
   }
 
