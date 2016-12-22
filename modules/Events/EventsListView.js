@@ -194,7 +194,7 @@ export default class EventsListView extends Mn.ItemView {
       .then(() => {
         setTimeout(() => {
           this.processUsers(defer, 'going');
-        }, 1500)
+        }, 2000)
       });
       return defer.promise();
   }
@@ -338,14 +338,19 @@ export default class EventsListView extends Mn.ItemView {
         var cell = el.querySelectorAll('table');
         if (cell.length) {
           var cell2 = cell[0].querySelectorAll('td')[1].querySelectorAll(':scope > div');
-          var name = cell2[0].querySelector('a').innerText.split('(')[0].trim().split(' ');
+          var name;
+          if (cell2[0].querySelector('a')) {
+              name = cell2[0].querySelector('a').querySelector('span').innerText.split('(')[0].trim().split(' ');
+          } else {
+              name = cell2[0].querySelector('span').innerText.split('(')[0].trim().split(' ');
+          }
           var toAdd = 3 - name.length;
           while (toAdd--) {
             name.push('');
           }
           return {
             name: name.join(';'),
-            href: cell2[0].querySelector('a').href,
+            href: cell2[0].querySelector('a') ? cell2[0].querySelector('a').href : '',
             invited: cell2[1].innerText,
             status: status
           }
@@ -375,7 +380,9 @@ export default class EventsListView extends Mn.ItemView {
 		var cArr = [];
 		for (var i = 0, l = this.results.length;i<l;i++) {
 			var item = this.results[i];
-      delete item.url;
+			if (item) {
+                delete item.url;
+            }
 			var arr = [];
 			for (var name in item) {
 				arr.push(item[name]);
