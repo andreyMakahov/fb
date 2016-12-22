@@ -24,7 +24,7 @@ export default class EventsListCollection extends Backbone.Collection {
         this.set(eventsList);
         result.resolve(eventsList);
       });
-    }, 3000);
+    }, 8000);
     return result.promise;
   }
 

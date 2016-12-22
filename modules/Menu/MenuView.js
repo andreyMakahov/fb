@@ -68,7 +68,7 @@ class MenuView extends Mn.LayoutView {
 					});
 				}, 2000);
 			});
-		}, 2000)
+		}, 8000)
 	}
 
 	parseList() {
